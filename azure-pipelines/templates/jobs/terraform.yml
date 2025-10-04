@@ -10,7 +10,7 @@ parameters:
 jobs:
   - job: Terraform
     displayName: 'Terraform Infrastructure'
-  pool: ${{ parameters.pool }}
+    pool: ${{ parameters.pool }}
     steps:
       - checkout: self
       - task: TerraformTask@5
