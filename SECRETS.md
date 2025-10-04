@@ -38,7 +38,7 @@
 | TF_BACKEND_RG_NAME        | Terraform backend resource group name        | rg-terraform         |
 | TF_STORAGE_ACCOUNT        | Terraform backend storage account name       | mystorageaccount     |
 | TF_BACKEND_CONTAINER      | Terraform backend container name             | tfstate              |
-| ARM_CONNECTION            | Azure service connection name                | MyAzureConnection    |
+| TF_BACKEND_ARM            | Azure service connection name                | MyAzureConnection    |
 
 ## Vault/Library Variables (to be stored in Azure Key Vault)
 
@@ -78,7 +78,7 @@
 ```yaml
 - task: AzureKeyVault@2
   inputs:
-    azureSubscription: '$(ARM_CONNECTION)'
+    azureSubscription: '$(TF_BACKEND_ARM)'
     KeyVaultName: 'vs-infra-$(Environment)'
     SecretsFilter: '*'
     RunAsPreJob: true
@@ -89,13 +89,13 @@
 ## Example Secret Injection
 - **TerraformTaskV5:**
   ```yaml
-  - task: TerraformTaskV5@5
+  - task: TerraformTask@5
     displayName: 'Terraform Apply'
     inputs:
       provider: 'azurerm'
       command: 'apply'
       workingDirectory: 'terraform/environments/$(Environment)'
-      environmentServiceNameAzureRM: '$(ARM_CONNECTION)'
+      environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
       vars: |
         pg_admin_password=$(pg_admin_password)
         rabbitmq_password=$(rabbitmq_password)
