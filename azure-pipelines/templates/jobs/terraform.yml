@@ -4,14 +4,13 @@ parameters:
   - name: Environment
     type: string
   - name: pool
-    type: object
-    default:
-      name: Default
+    type: string
+    default: Default
 
 jobs:
   - job: Terraform
     displayName: 'Terraform Infrastructure'
-    pool: ${{ parameters.pool }}
+  pool: ${{ parameters.pool }}
     steps:
       - checkout: self
       - task: TerraformTask@5
