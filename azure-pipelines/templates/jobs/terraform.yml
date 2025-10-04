@@ -1,4 +1,3 @@
-
 parameters:
   - name: ClientName
     type: string
@@ -15,34 +14,34 @@ jobs:
     pool: ${{ parameters.pool }}
     steps:
       - checkout: self
-      - task: TerraformTaskV5@5
+      - task: TerraformTask@5
         displayName: 'Terraform Init'
         inputs:
           provider: 'azurerm'
           command: 'init'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
-          backendServiceArm: '$(ARM_CONNECTION)'
+          backendServiceArm: '$(TF_BACKEND_ARM)'
           backendAzureRmResourceGroupName: '$(TF_BACKEND_RG_NAME)'
           backendAzureRmStorageAccountName: '$(TF_STORAGE_ACCOUNT)'
           backendAzureRmContainerName: '$(TF_BACKEND_CONTAINER)'
           backendAzureRmKey: '${{ parameters.Environment }}/${{ parameters.ClientName }}.tfstate'
-      - task: TerraformTaskV5@5
+      - task: TerraformTask@5
         displayName: 'Terraform Plan'
         inputs:
           provider: 'azurerm'
           command: 'plan'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
-          environmentServiceNameAzureRM: '$(ARM_CONNECTION)'
+          environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
           vars: |
             client_name=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
-      - task: TerraformTaskV5@5
+      - task: TerraformTask@5
         displayName: 'Terraform Apply'
         inputs:
           provider: 'azurerm'
           command: 'apply'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
-          environmentServiceNameAzureRM: '$(ARM_CONNECTION)'
+          environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
           vars: |
             client_name=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
