@@ -31,7 +31,16 @@
 ---
 
 
-## Pipeline/Library Variables (for backend and secrets)
+
+
+## Linking Variable Group in Azure Pipelines
+To use these variables, link the variable group in your pipeline YAML:
+```yaml
+variables:
+  - group: tf-shared-vars
+```
+
+> **Azure DevOps Variable Group:** All pipeline variables for backend and secrets are managed in the variable group named `tf-shared-vars`. Link this group to your pipeline for consistent variable injection.
 
 | Variable Name              | Description                                 | Example Value         |
 |---------------------------|---------------------------------------------|----------------------|

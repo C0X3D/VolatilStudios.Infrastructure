@@ -1,6 +1,7 @@
 trigger: none
 
 variables:
+  - group: tf-shared-vars
   - name: pool
     value: Default
 
