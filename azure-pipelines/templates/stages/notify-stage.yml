@@ -1,0 +1,11 @@
+parameters:
+  - name: message
+    type: string
+stages:
+- stage: Notify
+  jobs:
+    - job: Notify
+      steps:
+        - template: ../steps/notify.yml
+          parameters:
+            message: ${{ parameters.message }}

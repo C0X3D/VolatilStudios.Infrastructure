@@ -1,0 +1,9 @@
+replicaCount: 1
+rabbitmq:
+  username: user
+  client: "{{ .Values.client }}"
+  environment: "{{ .Values.environment }}"
+  password: ""
+service:
+  type: ClusterIP
+  port: 5672

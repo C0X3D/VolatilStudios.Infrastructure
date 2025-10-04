@@ -1,0 +1,4 @@
+apiVersion: v2
+name: rediscache
+version: 0.1.0
+description: A Helm chart for Redis Cache

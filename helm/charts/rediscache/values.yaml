@@ -1,0 +1,6 @@
+replicaCount: 1
+redis:
+  password: ""
+service:
+  type: ClusterIP
+  port: 6379

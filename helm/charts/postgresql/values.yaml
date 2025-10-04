@@ -1,0 +1,8 @@
+replicaCount: 1
+postgresql:
+  username: pgadmin
+  password: changeme123!
+  database: appdb
+service:
+  type: ClusterIP
+  port: 5432

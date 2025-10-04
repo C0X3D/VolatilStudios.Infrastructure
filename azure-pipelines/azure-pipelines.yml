@@ -1,0 +1,6 @@
+# This file is a dispatcher/documentation only.
+# To run a pipeline for a specific client/environment, use the YAML in clients/<client>/<env>-pipeline.yml
+
+# Example:
+# azure-pipelines/clients/demo/dev-pipeline.yml
+# azure-pipelines/clients/duckbet/prod-pipeline.yml

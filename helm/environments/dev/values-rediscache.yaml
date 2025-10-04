@@ -1,0 +1,8 @@
+replicaCount: 1
+redis:
+  password: ""
+  client: "{{ .Values.client }}"
+  environment: "{{ .Values.environment }}"
+service:
+  type: ClusterIP
+  port: 6379

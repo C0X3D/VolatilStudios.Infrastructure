@@ -1,0 +1,72 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+  - name: pool
+    type: object
+    default:
+      name: Default
+
+stages:
+  - stage: HelmDeploy
+    displayName: "Helm Deploy - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
+    jobs:
+      - job: HelmSetup
+        displayName: "Helm Setup and Secrets"
+        pool: ${{ parameters.pool }}
+        steps:
+          - checkout: self
+          - task: HelmInstaller@1
+            displayName: "Install Helm CLI"
+            inputs:
+              helmVersionToInstall: "latest"
+          - task: AzureKeyVault@2
+            displayName: "Fetch Secrets from Key Vault"
+            inputs:
+              azureSubscription: '$(ARM_CONNECTION)'
+              KeyVaultName: 'vs-infra-${{ parameters.Environment }}'
+              SecretsFilter: '*'
+
+  - template: jobs/helm-release.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ parameters.pool }}
+          ReleaseName: "postgresql"
+          ChartPath: "helm/charts/postgresql"
+          ValuesFile: "helm/environments/${{ parameters.Environment }}/values-postgresql.yaml"
+          ExtraArgs: "--set postgresql.password=$(pg_admin_password)"
+
+  - template: jobs/helm-release.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ parameters.pool }}
+          ReleaseName: "rabbitmq"
+          ChartPath: "helm/charts/rabbitmq"
+          ValuesFile: "helm/environments/${{ parameters.Environment }}/values-rabbitmq.yaml"
+          ExtraArgs: "--set rabbitmq.password=$(rabbitmq_password)"
+
+  - template: jobs/helm-release.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ parameters.pool }}
+          ReleaseName: "rediscache"
+          ChartPath: "helm/charts/rediscache"
+          ValuesFile: "helm/environments/${{ parameters.Environment }}/values-rediscache.yaml"
+          ExtraArgs: "--set redis.password=$(rediscache_password)"
+
+  - template: jobs/helm-release.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ parameters.pool }}
+          ReleaseName: "app"
+          ChartPath: "helm/charts/app"
+          ValuesFile: "helm/environments/${{ parameters.Environment }}/values-app.yaml"
+          ExtraArgs: >
+            --set postgresql.password=$(pg_admin_password)
+            --set rabbitmq.password=$(rabbitmq_password)
+            --set rediscache.password=$(rediscache_password)

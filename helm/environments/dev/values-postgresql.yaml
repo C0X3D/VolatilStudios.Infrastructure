@@ -1,0 +1,10 @@
+replicaCount: 1
+postgresql:
+  username: ""
+  password: ""
+  client: "{{ .Values.client }}"
+  environment: "{{ .Values.environment }}"
+  database: appdb
+service:
+  type: ClusterIP
+  port: 5432

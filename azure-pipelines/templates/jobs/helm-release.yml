@@ -1,0 +1,32 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+  - name: pool
+    type: object
+    default:
+      name: Default
+  - name: ReleaseName
+    type: string
+  - name: ChartPath
+    type: string
+  - name: ValuesFile
+    type: string
+  - name: ExtraArgs
+    type: string
+    default: ""
+
+jobs:
+  - job: DeployHelm_${{ parameters.ReleaseName }}
+    displayName: "Helm Deploy ${{ parameters.ReleaseName }}"
+    pool: ${{ parameters.pool }}
+    steps:
+      - bash: |
+          helm upgrade --install ${{ parameters.ClientName }}-${{ parameters.ReleaseName }} \
+            ${{ parameters.ChartPath }} \
+            -f ${{ parameters.ValuesFile }} \
+            --namespace ${{ parameters.ClientName }}-${{ parameters.Environment }} \
+            --create-namespace \
+            ${{ parameters.ExtraArgs }}
+        displayName: "Deploy Helm chart: ${{ parameters.ReleaseName }}"

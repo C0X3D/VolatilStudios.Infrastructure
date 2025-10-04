@@ -1,0 +1,11 @@
+trigger: none
+
+variables:
+  - name: pool
+    value: Default
+
+stages:
+  - template: ../../azure-pipelines.client-template.yml
+    parameters:
+      ClientName: demo
+      Environment: dev

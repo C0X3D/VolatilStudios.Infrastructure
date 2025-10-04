@@ -1,0 +1,7 @@
+replicaCount: 1
+rabbitmq:
+  username: user
+  password: changeme
+service:
+  type: ClusterIP
+  port: 5672

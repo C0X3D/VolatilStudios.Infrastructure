@@ -1,0 +1,18 @@
+replicaCount: 2
+image:
+  repository: myapp
+  tag: staging
+service:
+  type: ClusterIP
+  port: 8080
+rabbitmq:
+  host: rabbitmq
+  port: 5672
+postgresql:
+  host: "{{ .Values.client }}-{{ .Values.environment }}-postgres"
+  port: 5432
+  user: ""
+  password: ""
+rediscache:
+  host: "{{ .Values.client }}-{{ .Values.environment }}-redis"
+  port: 6379

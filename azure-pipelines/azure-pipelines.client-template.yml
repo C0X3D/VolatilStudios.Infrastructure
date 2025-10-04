@@ -1,0 +1,25 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+
+stages:
+  - stage: Terraform
+    displayName: 'Terraform Infrastructure'
+    jobs:
+      - template: templates/jobs/terraform.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ variables.pool }}
+
+  - stage: Helm
+    displayName: 'Helm Deployments'
+    dependsOn: Terraform
+    jobs:
+      - template: templates/jobs/helm.yml
+        parameters:
+          ClientName: ${{ parameters.ClientName }}
+          Environment: ${{ parameters.Environment }}
+          pool: ${{ variables.pool }}
