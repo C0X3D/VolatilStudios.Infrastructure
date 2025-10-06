@@ -48,7 +48,7 @@ jobs:
             else
               echo "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
             fi
-        workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: PowerShell@2
         displayName: 'Optional: run tflint (Windows)'
@@ -64,4 +64,4 @@ jobs:
             } else {
               Write-Host "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
             }
-        workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
