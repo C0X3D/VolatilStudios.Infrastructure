@@ -37,13 +37,25 @@ jobs:
             client=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
 
-      - task: TerraformTask@5
-        displayName: 'Terraform Fmt (check)'
+      - task: Bash@3
+        displayName: 'Terraform Fmt (check) (Linux / macOS)'
+        condition: or(eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin'))
         inputs:
-          provider: 'azurerm'
-          command: 'fmt'
+          targetType: 'inline'
+          script: |
+            echo "Running terraform fmt -check -recursive"
+            terraform fmt -check -recursive
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
-          commandOptions: '-check -recursive'
+
+      - task: PowerShell@2
+        displayName: 'Terraform Fmt (check) (Windows)'
+        condition: eq(variables['Agent.OS'], 'Windows_NT')
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "Running terraform fmt -check -recursive"
+            terraform fmt -check -recursive
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: Bash@3
         displayName: 'Optional: run tflint (Linux / macOS)'
