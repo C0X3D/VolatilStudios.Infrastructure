@@ -8,6 +8,7 @@ parameters:
 
 jobs:
   - job: Terraform_Apply
+    dependsOn: Terraform_Plan
     displayName: "Terraform Apply - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
     pool:
       name: ${{ parameters.PoolName }}
