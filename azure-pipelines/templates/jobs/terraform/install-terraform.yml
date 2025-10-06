@@ -1,0 +1,25 @@
+parameters:
+  - name: ClientName
+    type: string
+    default: ''
+  - name: Environment
+    type: string
+    default: ''
+  - name: PoolName
+    type: string
+    default: Default
+  - name: TerraformVersion
+    type: string
+    default: 'latest'
+
+jobs:
+  - job: Install_Terraform
+    displayName: "Install Terraform${{ if ne(parameters.ClientName, '') }} - ${{ parameters.ClientName }}${{ if ne(parameters.Environment, '') }}-${{ parameters.Environment }}${{ end }}${{ end }}"
+    pool:
+      name: ${{ parameters.PoolName }}
+    steps:
+      - checkout: none
+      - task: TerraformInstaller@1
+        displayName: "Install Terraform CLI (${{ parameters.TerraformVersion }})"
+        inputs:
+          terraformVersion: '${{ parameters.TerraformVersion }}'

@@ -12,7 +12,11 @@ stages:
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
+<<<<<<< Updated upstream
           PoolName: ${{ variables.pool }}
+=======
+          PoolName: ${{ variables.PoolName }}
+>>>>>>> Stashed changes
 
   - stage: Helm
     displayName: 'Helm Deployments'
@@ -22,4 +26,8 @@ stages:
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
+<<<<<<< Updated upstream
           PoolName: ${{ variables.pool }}
+=======
+          PoolName: ${{ variables.PoolName }}
+>>>>>>> Stashed changes

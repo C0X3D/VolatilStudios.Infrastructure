@@ -1,0 +1,28 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+  - name: PoolName
+    type: string
+    default: Default
+
+jobs:
+  - job: Terraform_Apply
+    displayName: "Terraform Apply - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
+    pool:
+      name: ${{ parameters.PoolName }}
+    steps:
+      - checkout: self
+      - task: TerraformTask@5
+        displayName: 'Terraform Apply'
+        inputs:
+          provider: 'azurerm'
+          command: 'apply'
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+          vars: |
+            client_name=${{ parameters.ClientName }}
+            environment=${{ parameters.Environment }}
+          ensureBackend: true
+          allowTelemetryCollection: true

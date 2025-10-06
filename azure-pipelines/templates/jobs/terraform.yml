@@ -8,6 +8,7 @@ parameters:
     default: Default
 
 jobs:
+<<<<<<< Updated upstream
   - job: Terraform
     displayName: 'Terraform Infrastructure'
     pool:
@@ -148,3 +149,29 @@ jobs:
                                 environment=${{ parameters.Environment }}
                               ensureBackend: true
                               allowTelemetryCollection: true
+=======
+  - template: templates/jobs/terraform/install-terraform.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+      TerraformVersion: '1.13.3'
+
+  - template: templates/jobs/terraform/terraform-init.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+
+  - template: templates/jobs/terraform/terraform-plan.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+
+  - template: templates/jobs/terraform/terraform-apply.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+>>>>>>> Stashed changes

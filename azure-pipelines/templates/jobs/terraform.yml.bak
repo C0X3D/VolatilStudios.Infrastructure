@@ -1,0 +1,27 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+  - name: PoolName
+    type: string
+    default: Default
+
+jobs:
+  - template: templates/jobs/terraform/terraform-init.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+
+  - template: templates/jobs/terraform/terraform-plan.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+
+  - template: templates/jobs/terraform/terraform-apply.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
