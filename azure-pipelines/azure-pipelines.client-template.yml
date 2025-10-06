@@ -13,7 +13,11 @@ stages:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           PoolName: ${{ variables.pool }}
+=======
+          PoolName: ${{ variables.PoolName }}
+>>>>>>> Stashed changes
 =======
           PoolName: ${{ variables.PoolName }}
 >>>>>>> Stashed changes
@@ -27,7 +31,11 @@ stages:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
           PoolName: ${{ variables.pool }}
+=======
+          PoolName: ${{ variables.PoolName }}
+>>>>>>> Stashed changes
 =======
           PoolName: ${{ variables.PoolName }}
 >>>>>>> Stashed changes

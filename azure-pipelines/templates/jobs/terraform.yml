@@ -9,6 +9,7 @@ parameters:
 
 jobs:
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   - job: Terraform
     displayName: 'Terraform Infrastructure'
     pool:
@@ -150,6 +151,8 @@ jobs:
                               ensureBackend: true
                               allowTelemetryCollection: true
 =======
+=======
+>>>>>>> Stashed changes
   - template: templates/jobs/terraform/install-terraform.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
@@ -174,4 +177,7 @@ jobs:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

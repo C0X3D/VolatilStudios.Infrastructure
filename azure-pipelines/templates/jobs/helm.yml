@@ -29,7 +29,11 @@ stages:
               SecretsFilter: '*'
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       - template: jobs/helm-release.yml
+=======
+      - template: jobs/helm/helm-release.yml
+>>>>>>> Stashed changes
 =======
       - template: jobs/helm/helm-release.yml
 >>>>>>> Stashed changes
@@ -43,7 +47,11 @@ stages:
           ExtraArgs: "--set postgresql.password=$(pg_admin_password)"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       - template: jobs/helm-release.yml
+=======
+      - template: jobs/helm/helm-release.yml
+>>>>>>> Stashed changes
 =======
       - template: jobs/helm/helm-release.yml
 >>>>>>> Stashed changes
@@ -57,7 +65,11 @@ stages:
           ExtraArgs: "--set rabbitmq.password=$(rabbitmq_password)"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       - template: jobs/helm-release.yml
+=======
+      - template: jobs/helm/helm-release.yml
+>>>>>>> Stashed changes
 =======
       - template: jobs/helm/helm-release.yml
 >>>>>>> Stashed changes
@@ -71,7 +83,11 @@ stages:
           ExtraArgs: "--set redis.password=$(rediscache_password)"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       - template: jobs/helm-release.yml
+=======
+      - template: jobs/helm/helm-release.yml
+>>>>>>> Stashed changes
 =======
       - template: jobs/helm/helm-release.yml
 >>>>>>> Stashed changes
