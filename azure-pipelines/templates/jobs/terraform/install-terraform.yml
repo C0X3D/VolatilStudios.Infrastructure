@@ -14,10 +14,7 @@ parameters:
 
 jobs:
   - job: Install_Terraform
-    displayName: >
-      Install Terraform
-      ${{ if ne(parameters.ClientName, '') }} - ${{ parameters.ClientName }}${{ end }}
-      ${{ if ne(parameters.Environment, '') }} - ${{ parameters.Environment }}${{ end }}
+    displayName: ${{ if and(ne(parameters.ClientName, ''), ne(parameters.Environment, '')) }}Install Terraform - ${{ parameters.ClientName }} - ${{ parameters.Environment }}${{ else if ne(parameters.ClientName, '') }}Install Terraform - ${{ parameters.ClientName }}${{ else if ne(parameters.Environment, '') }}Install Terraform - ${{ parameters.Environment }}${{ else }}Install Terraform${{ end }}
     pool:
       name: ${{ parameters.PoolName }}
     steps:
