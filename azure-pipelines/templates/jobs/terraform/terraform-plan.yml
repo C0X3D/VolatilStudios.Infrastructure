@@ -1,0 +1,26 @@
+parameters:
+  - name: ClientName
+    type: string
+  - name: Environment
+    type: string
+  - name: PoolName
+    type: string
+    default: Default
+
+jobs:
+  - job: Terraform_Plan
+    displayName: "Terraform Plan - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
+    pool:
+      name: ${{ parameters.PoolName }}
+    steps:
+      - checkout: self
+      - task: TerraformTask@5
+        displayName: 'Terraform Plan'
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+          vars: |
+            client_name=${{ parameters.ClientName }}
+            environment=${{ parameters.Environment }}

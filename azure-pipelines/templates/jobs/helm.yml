@@ -28,7 +28,7 @@ stages:
               KeyVaultName: 'vs-infra-${{ parameters.Environment }}'
               SecretsFilter: '*'
 
-      - template: jobs/helm-release.yml
+      - template: jobs/helm/helm-release.yml
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
@@ -38,7 +38,7 @@ stages:
           ValuesFile: "helm/environments/${{ parameters.Environment }}/values-postgresql.yaml"
           ExtraArgs: "--set postgresql.password=$(pg_admin_password)"
 
-      - template: jobs/helm-release.yml
+      - template: jobs/helm/helm-release.yml
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
@@ -48,7 +48,7 @@ stages:
           ValuesFile: "helm/environments/${{ parameters.Environment }}/values-rabbitmq.yaml"
           ExtraArgs: "--set rabbitmq.password=$(rabbitmq_password)"
 
-      - template: jobs/helm-release.yml
+      - template: jobs/helm/helm-release.yml
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
@@ -58,7 +58,7 @@ stages:
           ValuesFile: "helm/environments/${{ parameters.Environment }}/values-rediscache.yaml"
           ExtraArgs: "--set redis.password=$(rediscache_password)"
 
-      - template: jobs/helm-release.yml
+      - template: jobs/helm/helm-release.yml
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
