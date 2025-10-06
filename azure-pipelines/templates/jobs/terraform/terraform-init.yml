@@ -5,7 +5,6 @@ parameters:
     type: string
   - name: PoolName
     type: string
-    default: Default
 
 jobs:
   - job: Terraform_Init

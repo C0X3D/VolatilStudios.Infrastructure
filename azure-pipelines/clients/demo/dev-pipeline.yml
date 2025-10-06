@@ -3,7 +3,7 @@ trigger: none
 variables:
   - group: tf-shared-vars
   - name: PoolName
-    value: Default
+    value: "Default"
 
 stages:
   - template: ../../azure-pipelines.client-template.yml

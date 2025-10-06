@@ -2,11 +2,13 @@
 parameters:
   - name: ClientName
     type: string
+    default: "demo"
   - name: Environment
     type: string
+    default: "dev"
   - name: PoolName
     type: string
-    default: Default
+    default: "Default"
 
 jobs:
   - template: ./terraform/install-terraform.yml
@@ -14,7 +16,7 @@ jobs:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
-      TerraformVersion: '1.13.3'
+      TerraformVersion: "1.13.3"
 
   - template: ./terraform/terraform-init.yml
     parameters:
