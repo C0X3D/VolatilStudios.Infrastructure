@@ -44,7 +44,13 @@ jobs:
           targetType: 'inline'
           script: |
             echo "Running terraform fmt -check -recursive"
-            terraform fmt -check -recursive
+            if ! terraform fmt -check -recursive; then
+              echo "terraform fmt found issues. Files needing format (summary):"
+              terraform fmt -list -recursive || true
+              echo "Showing diffs:"
+              terraform fmt -diff -recursive || true
+              exit 1
+            fi
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: PowerShell@2
@@ -54,7 +60,14 @@ jobs:
           targetType: 'inline'
           script: |
             Write-Host "Running terraform fmt -check -recursive"
-            terraform fmt -check -recursive
+            & terraform fmt -check -recursive
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "terraform fmt found issues. Files needing format (summary):"
+              & terraform fmt -list -recursive | Write-Host
+              Write-Host "Showing diffs:"
+              & terraform fmt -diff -recursive
+              exit $LASTEXITCODE
+            }
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: Bash@3
