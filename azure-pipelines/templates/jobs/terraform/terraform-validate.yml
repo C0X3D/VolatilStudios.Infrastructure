@@ -8,6 +8,7 @@ parameters:
 
 jobs:
   - job: Terraform_Validate
+    dependsOn: Terraform_Init
     displayName: "Terraform Validate - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
     pool:
       name: ${{ parameters.PoolName }}
