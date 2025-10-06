@@ -34,14 +34,34 @@ jobs:
           command: 'validate'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
-      - script: |
-          echo "Checking for tflint..."
-          if command -v tflint >/dev/null 2>&1; then
-            echo "Running tflint"
-            tflint --init || true
-            tflint || true
-          else
-            echo "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
-          fi
-        displayName: 'Optional: run tflint (if installed)'
+      - task: Bash@3
+        displayName: 'Optional: run tflint (Linux / macOS)'
+        condition: or(eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin'))
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "Checking for tflint..."
+            if command -v tflint >/dev/null 2>&1; then
+              echo "Running tflint"
+              tflint --init || true
+              tflint || true
+            else
+              echo "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
+            fi
+        workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+
+      - task: PowerShell@2
+        displayName: 'Optional: run tflint (Windows)'
+        condition: eq(variables['Agent.OS'], 'Windows_NT')
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "Checking for tflint..."
+            if (Get-Command tflint -ErrorAction SilentlyContinue) {
+              Write-Host "Running tflint"
+              tflint --init | Out-Null
+              try { tflint } catch { Write-Host "tflint failed (non-fatal)" }
+            } else {
+              Write-Host "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
+            }
         workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
