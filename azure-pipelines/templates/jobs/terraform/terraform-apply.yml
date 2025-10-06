@@ -24,6 +24,35 @@ jobs:
           vars: |
             client=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
+            pg_admin_login=$(pg_admin_login)
+            pg_admin_password=$(pg_admin_password)
           ensureBackend: true
           allowTelemetryCollection: true
           autoApprove: true
+
+      # After apply: if pg_admin_password didn't exist, push generated/used password into Key Vault
+      - task: AzureCLI@2
+        displayName: 'Push DB secret to Key Vault if missing (bash)'
+        condition: and(eq(variables['Agent.OS'], 'Linux'), eq(variables['pg_admin_password_exists'], 'false'))
+        inputs:
+          azureSubscription: '$(TF_BACKEND_ARM)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            VAULT="vs-infra-${{ parameters.Environment }}"
+            SECRET_PW="postgresql-admin-password-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            echo "Pushing pg_admin_password to $VAULT/$SECRET_PW"
+            az keyvault secret set --vault-name "$VAULT" --name "$SECRET_PW" --value "$(pg_admin_password)"
+
+      - task: AzureCLI@2
+        displayName: 'Push DB secret to Key Vault if missing (PowerShell)'
+        condition: and(eq(variables['Agent.OS'], 'Windows_NT'), eq(variables['pg_admin_password_exists'], 'false'))
+        inputs:
+          azureSubscription: '$(TF_BACKEND_ARM)'
+          scriptType: 'ps'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            $vault = "vs-infra-${{ parameters.Environment }}"
+            $secretPw = "postgresql-admin-password-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            Write-Host "Pushing pg_admin_password to $vault/$secretPw"
+            az keyvault secret set --vault-name $vault --name $secretPw --value "$(pg_admin_password)"

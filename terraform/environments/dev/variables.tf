@@ -1,7 +1,24 @@
 variable "location" { default = "westeurope" }
-variable "environment" { default = "dev" }
-variable "client" {}
-variable "resource_group_name" { default = "" }
 
-variable "pg_admin_login" {}
-variable "pg_admin_password" {}
+variable "environment" {
+	type    = string
+	default = "dev"
+}
+
+variable "client" {
+	type = string
+}
+
+variable "resource_group_name" {
+	type    = string
+	default = ""
+}
+
+variable "pg_admin_login" {
+	type = string
+}
+
+variable "pg_admin_password" {
+	type      = string
+	sensitive = true
+}

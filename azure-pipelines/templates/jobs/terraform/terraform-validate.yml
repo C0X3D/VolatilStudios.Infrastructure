@@ -19,6 +19,53 @@ jobs:
       - checkout: self
         persistCredentials: ${{ parameters.AutoFormatCommit }}
 
+      # Fetch secrets from Key Vault (set pipeline variables pg_admin_password and pg_admin_login)
+      - task: AzureCLI@2
+        displayName: 'Fetch DB secrets from Key Vault (bash)'
+        condition: or(eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin'))
+        inputs:
+          azureSubscription: '$(TF_BACKEND_ARM)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            VAULT="vs-infra-${{ parameters.Environment }}"
+            SECRET_PW="postgresql-admin-password-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            SECRET_LOGIN="postgresql-admin-login-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            PW=$(az keyvault secret show --vault-name "$VAULT" --name "$SECRET_PW" --query value -o tsv 2>/dev/null || echo "")
+            LOGIN=$(az keyvault secret show --vault-name "$VAULT" --name "$SECRET_LOGIN" --query value -o tsv 2>/dev/null || echo "")
+            if [ -n "$PW" ]; then
+              echo "##vso[task.setvariable variable=pg_admin_password;issecret=true]$PW"
+              echo "##vso[task.setvariable variable=pg_admin_password_exists]true"
+            else
+              echo "##vso[task.setvariable variable=pg_admin_password;issecret=true]"""
+              echo "##vso[task.setvariable variable=pg_admin_password_exists]false"
+            fi
+            if [ -n "$LOGIN" ]; then
+              echo "##vso[task.setvariable variable=pg_admin_login;issecret=false]$LOGIN"
+              echo "##vso[task.setvariable variable=pg_admin_login_exists]true"
+            else
+              echo "##vso[task.setvariable variable=pg_admin_login;issecret=false]"""
+              echo "##vso[task.setvariable variable=pg_admin_login_exists]false"
+            fi
+
+      - task: AzureCLI@2
+        displayName: 'Fetch DB secrets from Key Vault (PowerShell)'
+        condition: eq(variables['Agent.OS'], 'Windows_NT')
+        inputs:
+          azureSubscription: '$(TF_BACKEND_ARM)'
+          scriptType: 'ps'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            $vault = "vs-infra-${{ parameters.Environment }}"
+            $secretPw = "postgresql-admin-password-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            $secretLogin = "postgresql-admin-login-${{ parameters.ClientName }}-${{ parameters.Environment }}"
+            $pw = ""
+            try { $pw = (az keyvault secret show --vault-name $vault --name $secretPw --query value -o tsv) } catch {}
+            $login = ""
+            try { $login = (az keyvault secret show --vault-name $vault --name $secretLogin --query value -o tsv) } catch {}
+            if ($pw) { Write-Host "##vso[task.setvariable variable=pg_admin_password;issecret=true]$pw"; Write-Host "##vso[task.setvariable variable=pg_admin_password_exists]true" } else { Write-Host "##vso[task.setvariable variable=pg_admin_password;issecret=true]"""; Write-Host "##vso[task.setvariable variable=pg_admin_password_exists]false" }
+            if ($login) { Write-Host "##vso[task.setvariable variable=pg_admin_login;issecret=false]$login"; Write-Host "##vso[task.setvariable variable=pg_admin_login_exists]true" } else { Write-Host "##vso[task.setvariable variable=pg_admin_login;issecret=false]"""; Write-Host "##vso[task.setvariable variable=pg_admin_login_exists]false" }
+
       - task: TerraformTask@5
         displayName: 'Terraform Init (for validate)'
         inputs:
@@ -85,7 +132,7 @@ jobs:
               echo "tflint already installed"
               exit 0
             fi
-            echo "tflint not found; installing..."
+            echo "tflint not found; installing latest..."
             OS_NAME=$(uname -s)
             case "$OS_NAME" in
               Linux*) FILE="tflint_linux_amd64.zip" ;;
@@ -94,10 +141,14 @@ jobs:
             esac
             URL="https://github.com/terraform-linters/tflint/releases/latest/download/${FILE}"
             echo "Downloading $URL"
-            curl -sSL -o /tmp/${FILE} "$URL"
-            unzip -o /tmp/${FILE} -d /tmp/tflint || true
-            sudo mv /tmp/tflint/tflint /usr/local/bin/tflint || sudo mv /tmp/tflint /usr/local/bin/
-            rm -rf /tmp/${FILE} /tmp/tflint || true
+            TMPZIP="/tmp/${FILE}"
+            curl -sSL -o "$TMPZIP" "$URL"
+            INSTALL_DIR="${AGENT_TOOLSDIRECTORY:-/tmp}/tflint/latest"
+            mkdir -p "$INSTALL_DIR"
+            unzip -o "$TMPZIP" -d "$INSTALL_DIR" || true
+            chmod +x "$INSTALL_DIR/tflint" || true
+            echo "##vso[task.prependpath]$INSTALL_DIR"
+            rm -f "$TMPZIP"
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: Bash@3
@@ -136,7 +187,9 @@ jobs:
             $url = "https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip"
             $out = "$env:TEMP\tflint.zip"
             Invoke-WebRequest -Uri $url -OutFile $out
-            $dest = "C:\tools\tflint"
+            $toolsDir = $env:AGENT_TOOLSDIRECTORY
+            if (-not $toolsDir) { $toolsDir = "C:\agent\_work\_tool" }
+            $dest = Join-Path $toolsDir "tflint\latest"
             New-Item -ItemType Directory -Path $dest -Force | Out-Null
             Expand-Archive -Path $out -DestinationPath $dest -Force
             Write-Host "##vso[task.prependpath]$dest"

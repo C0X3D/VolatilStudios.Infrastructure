@@ -36,3 +36,5 @@ jobs:
           vars: |
             client=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
+            pg_admin_login=$(pg_admin_login)
+            pg_admin_password=$(pg_admin_password)
