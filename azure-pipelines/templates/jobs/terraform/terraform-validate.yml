@@ -33,6 +33,17 @@ jobs:
           provider: 'azurerm'
           command: 'validate'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          vars: |
+            client=${{ parameters.ClientName }}
+            environment=${{ parameters.Environment }}
+
+      - task: TerraformTask@5
+        displayName: 'Terraform Fmt (check)'
+        inputs:
+          provider: 'azurerm'
+          command: 'fmt'
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+          commandOptions: '-check -recursive'
 
       - task: Bash@3
         displayName: 'Optional: run tflint (Linux / macOS)'

@@ -22,7 +22,8 @@ jobs:
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
           environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
           vars: |
-            client_name=${{ parameters.ClientName }}
+            client=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
           ensureBackend: true
           allowTelemetryCollection: true
+          autoApprove: true
