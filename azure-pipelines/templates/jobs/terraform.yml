@@ -24,14 +24,22 @@ jobs:
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
 
+  - template: ./terraform/terraform-validate.yml
+    parameters:
+      ClientName: ${{ parameters.ClientName }}
+      Environment: ${{ parameters.Environment }}
+      PoolName: ${{ parameters.PoolName }}
+
   - template: ./terraform/terraform-plan.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
+    dependsOn: Terraform_Validate
 
   - template: ./terraform/terraform-apply.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
+    dependsOn: Terraform_Plan

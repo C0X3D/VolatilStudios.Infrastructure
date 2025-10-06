@@ -7,14 +7,15 @@ parameters:
     type: string
 
 jobs:
-  - job: Terraform_Plan
-    displayName: "Terraform Plan - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
+  - job: Terraform_Validate
+    displayName: "Terraform Validate - ${{ parameters.ClientName }}-${{ parameters.Environment }}"
     pool:
       name: ${{ parameters.PoolName }}
     steps:
       - checkout: self
+
       - task: TerraformTask@5
-        displayName: 'Terraform Init (pre-plan)'
+        displayName: 'Terraform Init (for validate)'
         inputs:
           provider: 'azurerm'
           command: 'init'
@@ -26,12 +27,20 @@ jobs:
           backendAzureRmKey: '${{ parameters.Environment }}/${{ parameters.ClientName }}.tfstate'
 
       - task: TerraformTask@5
-        displayName: 'Terraform Plan'
+        displayName: 'Terraform Validate'
         inputs:
           provider: 'azurerm'
-          command: 'plan'
+          command: 'validate'
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
-          environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
-          vars: |
-            client_name=${{ parameters.ClientName }}
-            environment=${{ parameters.Environment }}
+
+      - script: |
+          echo "Checking for tflint..."
+          if command -v tflint >/dev/null 2>&1; then
+            echo "Running tflint"
+            tflint --init || true
+            tflint || true
+          else
+            echo "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
+          fi
+        displayName: 'Optional: run tflint (if installed)'
+        workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
