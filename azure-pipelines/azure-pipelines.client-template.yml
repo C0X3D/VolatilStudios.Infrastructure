@@ -3,6 +3,8 @@ parameters:
     type: string
   - name: Environment
     type: string
+  - name: PoolName
+    type: string
 
 stages:
   - stage: Terraform
@@ -12,7 +14,7 @@ stages:
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
-          PoolName: ${{ variables.PoolName }}
+          PoolName: ${{ parameters.PoolName }}
 
   - stage: Helm
     displayName: 'Helm Deployments'
@@ -22,4 +24,4 @@ stages:
         parameters:
           ClientName: ${{ parameters.ClientName }}
           Environment: ${{ parameters.Environment }}
-          PoolName: ${{ variables.PoolName }}
+          PoolName: ${{ parameters.PoolName }}

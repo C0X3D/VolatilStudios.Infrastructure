@@ -1,16 +1,12 @@
 parameters:
   - name: ClientName
     type: string
-    default: ''
   - name: Environment
     type: string
-    default: ''
   - name: PoolName
     type: string
-    default: Default
   - name: TerraformVersion
     type: string
-    default: 'latest'
 
 jobs:
   - job: Install_Terraform
