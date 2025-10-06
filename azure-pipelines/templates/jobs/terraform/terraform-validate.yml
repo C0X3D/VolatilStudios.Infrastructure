@@ -5,6 +5,9 @@ parameters:
     type: string
   - name: PoolName
     type: string
+  - name: AutoFormatCommit
+    type: boolean
+    default: false
 
 jobs:
   - job: Terraform_Validate
@@ -14,6 +17,7 @@ jobs:
       name: ${{ parameters.PoolName }}
     steps:
       - checkout: self
+        persistCredentials: ${{ parameters.AutoFormatCommit }}
 
       - task: TerraformTask@5
         displayName: 'Terraform Init (for validate)'
@@ -71,6 +75,32 @@ jobs:
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: Bash@3
+        displayName: 'Install tflint (Linux / macOS)'
+        condition: or(eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin'))
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "Checking for tflint..."
+            if command -v tflint >/dev/null 2>&1; then
+              echo "tflint already installed"
+              exit 0
+            fi
+            echo "tflint not found; installing..."
+            OS_NAME=$(uname -s)
+            case "$OS_NAME" in
+              Linux*) FILE="tflint_linux_amd64.zip" ;;
+              Darwin*) FILE="tflint_darwin_amd64.zip" ;;
+              *) echo "Unsupported OS: $OS_NAME"; exit 1 ;;
+            esac
+            URL="https://github.com/terraform-linters/tflint/releases/latest/download/${FILE}"
+            echo "Downloading $URL"
+            curl -sSL -o /tmp/${FILE} "$URL"
+            unzip -o /tmp/${FILE} -d /tmp/tflint || true
+            sudo mv /tmp/tflint/tflint /usr/local/bin/tflint || sudo mv /tmp/tflint /usr/local/bin/
+            rm -rf /tmp/${FILE} /tmp/tflint || true
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+
+      - task: Bash@3
         displayName: 'Optional: run tflint (Linux / macOS)'
         condition: or(eq(variables['Agent.OS'], 'Linux'), eq(variables['Agent.OS'], 'Darwin'))
         inputs:
@@ -82,8 +112,35 @@ jobs:
               tflint --init || true
               tflint || true
             else
-              echo "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
+              echo "tflint not found after install attempt; skipping."
             fi
+          workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+
+      - task: PowerShell@2
+        displayName: 'Install tflint (Windows)'
+        condition: eq(variables['Agent.OS'], 'Windows_NT')
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "Checking for tflint..."
+            if (Get-Command tflint -ErrorAction SilentlyContinue) {
+              Write-Host "tflint already installed"
+              exit 0
+            }
+            if (Get-Command choco -ErrorAction SilentlyContinue) {
+              Write-Host "Installing tflint via Chocolatey"
+              choco install tflint -y
+              exit 0
+            }
+            Write-Host "Chocolatey not found; downloading tflint zip"
+            $url = "https://github.com/terraform-linters/tflint/releases/latest/download/tflint_windows_amd64.zip"
+            $out = "$env:TEMP\tflint.zip"
+            Invoke-WebRequest -Uri $url -OutFile $out
+            $dest = "C:\tools\tflint"
+            New-Item -ItemType Directory -Path $dest -Force | Out-Null
+            Expand-Archive -Path $out -DestinationPath $dest -Force
+            Write-Host "##vso[task.prependpath]$dest"
+            Write-Host "tflint installed to $dest"
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
 
       - task: PowerShell@2
@@ -98,6 +155,43 @@ jobs:
               tflint --init | Out-Null
               try { tflint } catch { Write-Host "tflint failed (non-fatal)" }
             } else {
-              Write-Host "tflint not found; skipping. To enable tflint, install it on the agent or add a step to install it."
+              Write-Host "tflint not found after install attempt; skipping."
             }
           workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+
+      - task: Bash@3
+        displayName: 'Auto-commit terraform fmt changes (Linux/macOS)'
+        condition: and(eq('${{ parameters.AutoFormatCommit }}','true'), or(eq(variables['Agent.OS'],'Linux'), eq(variables['Agent.OS'],'Darwin')))
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "Checking for git changes..."
+            cd terraform/environments/${{ parameters.Environment }}
+            git config user.email "azure-pipelines@users.noreply"
+            git config user.name "Azure Pipelines"
+            if git diff --quiet --exit-code; then
+              echo "No formatting changes to commit"
+            else
+              git add -A
+              git commit -m "chore: terraform fmt (CI)"
+              git push
+            fi
+
+      - task: PowerShell@2
+        displayName: 'Auto-commit terraform fmt changes (Windows)'
+        condition: and(eq('${{ parameters.AutoFormatCommit }}','true'), eq(variables['Agent.OS'],'Windows_NT'))
+        inputs:
+          targetType: 'inline'
+          script: |
+            Write-Host "Checking for git changes..."
+            Set-Location -Path "terraform/environments/${{ parameters.Environment }}"
+            git config user.email "azure-pipelines@users.noreply"
+            git config user.name "Azure Pipelines"
+            $diff = git status --porcelain
+            if ([string]::IsNullOrEmpty($diff)) {
+              Write-Host "No formatting changes to commit"
+            } else {
+              git add -A
+              git commit -m "chore: terraform fmt (CI)"
+              git push
+            }
