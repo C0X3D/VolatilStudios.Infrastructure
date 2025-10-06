@@ -3,10 +3,9 @@ parameters:
     type: string
   - name: Environment
     type: string
-  - name: pool
-    type: object
-    default:
-      name: Default
+  - name: PoolName
+    type: string
+    default: Default
   - name: ReleaseName
     type: string
   - name: ChartPath
@@ -20,7 +19,8 @@ parameters:
 jobs:
   - job: DeployHelm_${{ parameters.ReleaseName }}
     displayName: "Helm Deploy ${{ parameters.ReleaseName }}"
-    pool: ${{ parameters.pool }}
+    pool:
+      name: ${{ parameters.PoolName }}
     steps:
       - bash: |
           helm upgrade --install ${{ parameters.ClientName }}-${{ parameters.ReleaseName }} \

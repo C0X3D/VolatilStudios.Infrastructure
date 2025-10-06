@@ -3,14 +3,15 @@ parameters:
     type: string
   - name: Environment
     type: string
-  - name: pool
+  - name: PoolName
     type: string
     default: Default
 
 jobs:
   - job: Terraform
     displayName: 'Terraform Infrastructure'
-    pool: ${{ parameters.pool }}
+    pool:
+      name: ${{ parameters.PoolName }}
     steps:
       - checkout: self
       - task: TerraformInstaller@1
@@ -47,5 +48,103 @@ jobs:
           vars: |
             client_name=${{ parameters.ClientName }}
             environment=${{ parameters.Environment }}
-          ensureBackend: true
-          allowTelemetryCollection: true
+          parameters:
+            - name: ClientName
+              type: string
+            - name: Environment
+              type: string
+            - name: pool
+              type: string
+              default: Default
+
+          jobs:
+            - job: Terraform
+              displayName: 'Terraform Infrastructure'
+              pool: ${{ parameters.pool }}
+              steps:
+                - checkout: self
+                - task: TerraformInstaller@1
+                  inputs:
+                    terraformVersion: '1.13.3'
+                - task: TerraformTask@5
+                  displayName: 'Terraform Init'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'init'
+                    workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                    backendServiceArm: '$(TF_BACKEND_ARM)'
+                    backendAzureRmResourceGroupName: '$(TF_BACKEND_RG_NAME)'
+                    backendAzureRmStorageAccountName: '$(TF_STORAGE_ACCOUNT)'
+                    backendAzureRmContainerName: '$(TF_BACKEND_CONTAINER)'
+                    backendAzureRmKey: '${{ parameters.Environment }}/${{ parameters.ClientName }}.tfstate'
+                - task: TerraformTask@5
+                  displayName: 'Terraform Plan'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'plan'
+                    workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                    environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+                    vars: |
+                      client_name=${{ parameters.ClientName }}
+                      environment=${{ parameters.Environment }}
+                - task: TerraformTask@5
+                  displayName: 'Terraform Apply'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'apply'
+                    workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                    environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+                    vars: |
+                      client_name=${{ parameters.ClientName }}
+                      environment=${{ parameters.Environment }}
+                    parameters:
+                      - name: ClientName
+                        type: string
+                      - name: Environment
+                        type: string
+                      - name: pool
+                        type: string
+                        default: Default
+
+                    jobs:
+                      - job: Terraform
+                        displayName: 'Terraform Infrastructure'
+                        pool: ${{ parameters.pool }}
+                        steps:
+                          - checkout: self
+                          - task: TerraformInstaller@1
+                            inputs:
+                              terraformVersion: '1.13.3'
+                          - task: TerraformTask@5
+                            displayName: 'Terraform Init'
+                            inputs:
+                              provider: 'azurerm'
+                              command: 'init'
+                              workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                              backendServiceArm: '$(TF_BACKEND_ARM)'
+                              backendAzureRmResourceGroupName: '$(TF_BACKEND_RG_NAME)'
+                              backendAzureRmStorageAccountName: '$(TF_STORAGE_ACCOUNT)'
+                              backendAzureRmContainerName: '$(TF_BACKEND_CONTAINER)'
+                              backendAzureRmKey: '${{ parameters.Environment }}/${{ parameters.ClientName }}.tfstate'
+                          - task: TerraformTask@5
+                            displayName: 'Terraform Plan'
+                            inputs:
+                              provider: 'azurerm'
+                              command: 'plan'
+                              workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                              environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+                              vars: |
+                                client_name=${{ parameters.ClientName }}
+                                environment=${{ parameters.Environment }}
+                          - task: TerraformTask@5
+                            displayName: 'Terraform Apply'
+                            inputs:
+                              provider: 'azurerm'
+                              command: 'apply'
+                              workingDirectory: 'terraform/environments/${{ parameters.Environment }}'
+                              environmentServiceNameAzureRM: '$(TF_BACKEND_ARM)'
+                              vars: |
+                                client_name=${{ parameters.ClientName }}
+                                environment=${{ parameters.Environment }}
+                              ensureBackend: true
+                              allowTelemetryCollection: true
