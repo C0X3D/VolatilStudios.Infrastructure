@@ -2,7 +2,7 @@ trigger: none
 
 variables:
   - group: tf-shared-vars
-  - name: pool
+  - name: PoolName
     value: Default
 
 stages:
