@@ -14,7 +14,10 @@ parameters:
 
 jobs:
   - job: Install_Terraform
-    displayName: "Install Terraform${{ if ne(parameters.ClientName, '') }} - ${{ parameters.ClientName }}${{ if ne(parameters.Environment, '') }}-${{ parameters.Environment }}${{ end }}${{ end }}"
+    displayName: >
+      Install Terraform
+      ${{ if ne(parameters.ClientName, '') }} - ${{ parameters.ClientName }}${{ end }}
+      ${{ if ne(parameters.Environment, '') }} - ${{ parameters.Environment }}${{ end }}
     pool:
       name: ${{ parameters.PoolName }}
     steps:

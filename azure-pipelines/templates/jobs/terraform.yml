@@ -1,3 +1,4 @@
+# Clean Terraform orchestrator
 parameters:
   - name: ClientName
     type: string
@@ -8,26 +9,26 @@ parameters:
     default: Default
 
 jobs:
-  - template: templates/jobs/terraform/install-terraform.yml
+  - template: ./terraform/install-terraform.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
       TerraformVersion: '1.13.3'
 
-  - template: templates/jobs/terraform/terraform-init.yml
+  - template: ./terraform/terraform-init.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
 
-  - template: templates/jobs/terraform/terraform-plan.yml
+  - template: ./terraform/terraform-plan.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
       PoolName: ${{ parameters.PoolName }}
 
-  - template: templates/jobs/terraform/terraform-apply.yml
+  - template: ./terraform/terraform-apply.yml
     parameters:
       ClientName: ${{ parameters.ClientName }}
       Environment: ${{ parameters.Environment }}
