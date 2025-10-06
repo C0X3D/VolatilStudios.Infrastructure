@@ -6,6 +6,10 @@ module "network" {
 	resource_group_name = local.computed_resource_group_name
 }
 
+terraform {
+  backend "azurerm" {}
+}
+
 # Outputs for subnet IDs:
 # module.network.aks_subnet_id
 # module.network.postgresql_subnet_id
